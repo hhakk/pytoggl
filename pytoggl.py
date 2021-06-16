@@ -7,6 +7,17 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 print("--pytoggl--")
+# Get timezone difference to UTC
+TZ_DIFF = "%02d:00" % int(
+    datetime.datetime.now()
+    .astimezone()
+    .tzinfo.utcoffset(datetime.datetime.now())
+    .seconds
+    / 3600
+)
+if TZ_DIFF[0] != "-":
+    TZ_DIFF = "+" + TZ_DIFF
+print("Detected timezone UTC difference: %s hrs" % TZ_DIFF)
 TOGGL_DIR = Path.home().joinpath(".local/share/toggl")
 Path(TOGGL_DIR).mkdir(parents=True, exist_ok=True)
 API_KEY_FILE = Path(TOGGL_DIR).joinpath("api_key")
@@ -18,7 +29,10 @@ if API_KEY_FILE.is_file():
         API_KEY = api_key_file.read().strip()
         auth = base64.b64encode(bytes("%s:%s" % (API_KEY, "api_token"), "ascii"))
 else:
-    print("No API key file found. Make sure you have your API key stored in a text file in '%s'" % str(API_KEY_FILE))
+    print(
+        "No API key file found. Make sure you have your API key stored in a text file in '%s'"
+        % str(API_KEY_FILE)
+    )
     exit(1)
 
 headers = {
@@ -75,12 +89,17 @@ if chosen_fav in ["", "-1"]:
         print("Available projects:\n")
         print(30 * "-")
         for idx, project in enumerate(projects_json):
-            print("[%s] %s - %s" % (idx, clients[project["cid"]], project["name"].strip()))
+            print(
+                "[%s] %s - %s" % (idx, clients[project["cid"]], project["name"].strip())
+            )
         chosen_project = input("Choose a project: ")
 
     sel_project = projects_json[int(chosen_project)]
     sel_project_id = sel_project["id"]
-    sel_project_name = "%s - %s" % (clients[sel_project["cid"]], sel_project["name"].strip())
+    sel_project_name = "%s - %s" % (
+        clients[sel_project["cid"]],
+        sel_project["name"].strip(),
+    )
 
 # QUICK SETUP
 description = ""
@@ -103,8 +122,10 @@ end_time = end_time[0:2] + ":" + end_time[2:4]
 
 duration = (
     datetime.datetime.strptime(end_time, "%H:%M")
-    - datetime.datetime.strptime(end_time, "%H:%M")
+    - datetime.datetime.strptime(start_time, "%H:%M")
 ).seconds
+
+print(duration)
 
 print("\n--NEW TIME ENTRY--")
 print(30 * "-")
@@ -122,7 +143,7 @@ if submit_confirmation.lower() == "y":
         "time_entry": {
             "description": description,
             "duration": duration,
-            "start": "%sT%s:00.000Z" % (day, start_time),
+            "start": "%sT%s:00%s" % (day, start_time, TZ_DIFF),
             "pid": sel_project_id,
             "created_with": "pytoggl",
         }
@@ -144,9 +165,7 @@ if submit_confirmation.lower() == "y":
         if FAV_PROJECTS_FILE.is_file():
             with open(FAV_PROJECTS_FILE, "r") as fav_projects_file:
                 fav_projects = set(fav_projects_file.readlines())
-                fav_projects.add(
-                    "%s\t%s" % (sel_project_id, sel_project_name)
-                )
+                fav_projects.add("%s\t%s" % (sel_project_id, sel_project_name))
         else:
             fav_projects = {"%s\t%s" % (sel_project_id, sel_project_name)}
         with open(FAV_PROJECTS_FILE, "w+") as fav_projects_file:
