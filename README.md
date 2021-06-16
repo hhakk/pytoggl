@@ -1,6 +1,6 @@
 # pytoggl
 
-Minimalist Python Toggl client for quickly creating time entries. No real-time tracking, just simple way to add time entries to your workspaces.
+Minimalist Python [Toggl](https://toggl.com/track) client for quickly creating time entries. No real-time tracking, just simple way to add time entries to your workspaces.
 
 ## Features and nonfeatures
 
