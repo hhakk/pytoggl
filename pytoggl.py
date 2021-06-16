@@ -130,8 +130,8 @@ if submit_confirmation.lower() == "y":
         data=bytes(json.dumps(post_fields), encoding="utf-8"),
         headers=headers,
     )
-    time_entry_response = json.loads(urlopen(request_projects).read().decode())
-    if "data" in time_entry_response[0].keys():
+    time_entry_response = json.loads(urlopen(request_time_entry).read().decode())
+    if "data" in time_entry_response.keys():
         print("Time entry submitted succesfully.")
 
     project_confirmation = ""
