@@ -34,13 +34,14 @@ if FAV_PROJECTS_FILE.is_file():
         fav_projects = fav_projects_file.readlines()
         for idx, fav in enumerate(fav_projects):
             print("[%s] %s\n" % (idx, fav.split("\t")[1]))
-            while chosen_fav not in [str(i) for i in range(len(fav_projects))] + [""]:
-                chosen_fav = input(
-                    "Choose favorite project (leave empty for manual setup): "
-                )
-
-                if chosen_fav != "":
-                    sel_project_id = fav_projects[int(chosen_fav)].split("\t")[0]
+        while chosen_fav not in [str(i) for i in range(len(fav_projects))] + [""]:
+            chosen_fav = input(
+                "Choose favorite project (leave empty for manual setup): "
+            )
+            if chosen_fav != "":
+                sel_project = fav_projects[int(chosen_fav)]
+                sel_project_id = sel_project.split("\t")[0]
+                sel_project_name = sel_project.split("\t")[1]
 # MANUAL SETUP
 if chosen_fav in ["", "-1"]:
     request_workspaces = Request(API_URL + "/workspaces", headers=headers)
@@ -77,8 +78,9 @@ if chosen_fav in ["", "-1"]:
             print("[%s] %s - %s" % (idx, clients[project["cid"]], project["name"].strip()))
         chosen_project = input("Choose a project: ")
 
-    sel_project_id = projects_json[int(chosen_project)]["id"]
-    sel_project_name = "%s - %s" % (clients[project["cid"]], project["name"].strip())
+    sel_project = projects_json[int(chosen_project)]
+    sel_project_id = sel_project["id"]
+    sel_project_name = "%s - %s" % (clients[sel_project["cid"]], sel_project["name"].strip())
 
 # QUICK SETUP
 description = ""
@@ -141,14 +143,16 @@ if submit_confirmation.lower() == "y":
     if project_confirmation.lower() == "y":
         if FAV_PROJECTS_FILE.is_file():
             with open(FAV_PROJECTS_FILE, "r") as fav_projects_file:
-                fav_projects = set(fav_projects_file.readlines()).add(
+                fav_projects = set(fav_projects_file.readlines())
+                fav_projects.add(
                     "%s\t%s" % (sel_project_id, sel_project_name)
                 )
         else:
             fav_projects = {"%s\t%s" % (sel_project_id, sel_project_name)}
         with open(FAV_PROJECTS_FILE, "w+") as fav_projects_file:
-            for fav in fav_projects:
+            for fav in list(fav_projects)[:-1]:
                 fav_projects_file.write("%s\n" % fav)
+            fav_projects_file.write("%s" % list(fav_projects)[-1])
         print("Project saved to favorites.")
 
 
