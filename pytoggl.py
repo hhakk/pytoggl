@@ -47,7 +47,7 @@ if FAV_PROJECTS_FILE.is_file():
     with open(FAV_PROJECTS_FILE, "r") as fav_projects_file:
         fav_projects = fav_projects_file.readlines()
         for idx, fav in enumerate(fav_projects):
-            print("[%s] %s\n" % (idx, fav.split("\t")[1]))
+            print("[%s] %s" % (idx, fav.split("\t")[1]))
         while chosen_fav not in [str(i) for i in range(len(fav_projects))] + [""]:
             chosen_fav = input(
                 "Choose favorite project (leave empty for manual setup): "
@@ -170,8 +170,8 @@ if submit_confirmation.lower() == "y":
             fav_projects = {"%s\t%s" % (sel_project_id, sel_project_name)}
         with open(FAV_PROJECTS_FILE, "w+") as fav_projects_file:
             for fav in list(fav_projects)[:-1]:
-                fav_projects_file.write("%s\n" % fav)
-            fav_projects_file.write("%s" % list(fav_projects)[-1])
+                fav_projects_file.write("%s\n" % fav.strip())
+            fav_projects_file.write("%s" % list(fav_projects)[-1].strip())
         print("Project saved to favorites.")
 
 
